@@ -1,3 +1,10 @@
+[![License Apache--2.0](https://img.shields.io/badge/License-Apache--2.0-green?label=License)](https://github.com/Arm-Software/CMSIS-RTX/blob/main/LICENSE)
+[![Build libs](https://img.shields.io/github/actions/workflow/status/Arm-Software/CMSIS-RTX/libs.yml?logo=arm&logoColor=0091bd&label=Build%20Libs)](./.github/workflows/libs.yml)
+[![Test Examples](https://img.shields.io/github/actions/workflow/status/Arm-Software/CMSIS-RTX/Test-Examples.yml?logo=arm&logoColor=0091bd&label=Test%20Examples)](./.github/workflows/Test-Examples.yml)
+[![RTOS2 Validation](https://img.shields.io/github/actions/workflow/status/Arm-Software/CMSIS-RTX/cmsis_rv2.yml?logo=arm&logoColor=0091bd&label=RTOS2%20Validation)](./.github/workflows/cmsis_rv2.yml)
+[![Build pack](https://img.shields.io/github/actions/workflow/status/Arm-Software/CMSIS-RTX/pack.yml?logo=arm&logoColor=0091bd&label=Build%20pack)](./.github/workflows/pack.yml)
+
+
 # CMSIS-RTX RTOS implementation
 
 **CMSIS-RTX** contains Keil RTX5 RTOS - a real-time operating system for Arm Cortex-M and Cortex-A processor-based devices that implements the [CMSIS-RTOS2 API](https://arm-software.github.io/CMSIS_6/latest/RTOS2/index.html) as its native interface.
@@ -13,6 +20,8 @@
 ```txt
   📦
   ┣ 📂 .github/workflows        GitHub Action workflows
+     ┣ 📄 Test-Examples.yml      Build and execution test for pre-configured examples
+     ┣ 📄 cmsis_rv2.yml          Executes CMSIS-RTOS2 validation test suite
      ┣ 📄 gh-pages.yml           Deployment of static documentation from gh-pages branch to GitHub Pages
      ┣ 📄 libs.yml               Build of the RTX libraries
      ┗ 📄 pack.yml               Generation/publish of the pack and documentation
@@ -23,6 +32,7 @@
   ┣ 📂 Examples                 Example projects (MDK uVision and CMSIS-Toolbox)
   ┣ 📂 Include                  Public header files of RTX software component
   ┣ 📂 Library                  Project files to build pre-built libraries
+  ┣ 📂 Overview                 Contains a top-level description of the pack contents
   ┣ 📂 Source                   Private header and source files of RTX software component
   ┣ 📂 Template                 User code template files
   ┣ 📄 ARM.CMSIS-RTX.pdsc        Pack description file
@@ -43,11 +53,11 @@ CMSIS-RTX $ ./Documentation/Doxygen/gen_doc.sh
 
 Prerequisites for these scripts to succeed are:
 
-- Doxygen 1.9.6
+- Doxygen 1.13.2
 - Python 3.9 or later with linkchecker package installed
   `pip install linkchecker`
 
-Also see [Documentation README](./documentation/README.md).
+Also see [Documentation README](./Documentation/README.md).
 
 ### CMSIS-Pack Bundle
 

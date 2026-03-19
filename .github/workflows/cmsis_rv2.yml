@@ -12,45 +12,46 @@ concurrency:
 
 env:
   CMSIS_PACK_ROOT: ${{ github.workspace }}/.packs
-  ARM_UBL_ACTIVATION_CODE: ${{ secrets.ARM_UBL_ACTIVATION_CODE }} 
+  ARM_UBL_ACTIVATION_CODE: ${{ secrets.ARM_UBL_ACTIVATION_CODE }}
+  IAR_LMS_BEARER_TOKEN: ${{ secrets.IAR_LMS_BEARER_TOKEN }}
 
 jobs:
   build-and-run:
     strategy:
       fail-fast: true
       matrix:
-        compiler: [AC6, GCC, Clang]
+        compiler: [AC6, GCC, Clang, IAR]
         variant: [RTX5, RTX5-Lib]
     
     runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout CMSIS-RTX
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: CMSIS-RTX
           fetch-depth: 0
       
       - name: Checkout CMSIS_6
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: ARM-software/CMSIS_6
           path: CMSIS_6
 
       - name: Checkout CMSIS-RTOS2_Validation
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: ARM-software/CMSIS-RTOS2_Validation
           path: CMSIS-RTOS2_Validation
 
       - name: Checkout Cortex_DFP
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: ARM-software/Cortex_DFP
           path: Cortex_DFP
   
       - name: Setup Python 3.10
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.10'    
 
@@ -64,7 +65,7 @@ jobs:
           pip install -r ./CMSIS-RTOS2_Validation/Project/requirements.txt
 
       - name: Cache packs
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           key: packs-${{ github.run_id }}-${{ matrix.compiler }}-${{ matrix.variant }}
           restore-keys: |
@@ -72,18 +73,15 @@ jobs:
           path: /home/runner/.cache/arm/packs
 
       - name: Setup vcpkg environment
-        uses: JonatanAntoni/actions/vcpkg@main
+        uses: ARM-software/cmsis-actions/vcpkg@v1.1
         with:
           config: ./CMSIS-RTOS2_Validation/Project/vcpkg-configuration.json
           cache: "-${{ matrix.compiler }}-${{ matrix.variant }}"
 
       - name: Activate Arm tool license
-        run: |
-          if [[ -n "${{ env.ARM_UBL_ACTIVATION_CODE }}" ]]; then
-            armlm activate --code ${{ env.ARM_UBL_ACTIVATION_CODE }}
-          else
-            armlm activate --server https://mdk-preview.keil.arm.com --product KEMDK-COM0
-          fi
+        uses: ARM-software/cmsis-actions/armlm@v1.1
+        with:
+          code: ${{ env.ARM_UBL_ACTIVATION_CODE }}
 
       - name: Register local packs
         run: |
@@ -107,7 +105,7 @@ jobs:
       
       - name: Initialize CodeQL
         if: matrix.compiler == 'GCC' && matrix.variant == 'RTX5'
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           source-root: CMSIS-RTX
           languages: cpp
@@ -126,26 +124,16 @@ jobs:
         run: |
           echo "Run test projects ..."
           ./build.py --verbose -r ${{ matrix.variant }} -c ${{ matrix.compiler }} run || echo "::warning::==== Some configurations failed to run! ==="
-
-      - name: Deactivate Arm tool license
-        if: always()
-        working-directory: ./CMSIS-RTOS2_Validation/Project
-        run: |
-          if [[ -n "${{ env.ARM_UBL_ACTIVATION_CODE }}" ]]; then
-            armlm deactivate --code ${{ env.ARM_UBL_ACTIVATION_CODE }}
-          else
-            armlm deactivate --product KEMDK-COM0
-          fi
-    
+   
       - name: Perform CodeQL Analysis
         if: matrix.compiler == 'GCC' && matrix.variant == 'RTX5'
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
         with:
           checkout_path: ${{ github.workspace }}/CMSIS-RTX
 
       - name: Upload Test Reports
         if: ${{ !cancelled() && env.ARM_UBL_ACTIVATION_CODE }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: test-results-${{ matrix.compiler }}-${{ matrix.variant }}
           path: ./CMSIS-RTOS2_Validation/Project/*.junit
@@ -162,7 +150,7 @@ jobs:
     steps:
       - name: Download Test Reports
         if: ${{ env.ARM_UBL_ACTIVATION_CODE }}
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           path: artifacts
 
